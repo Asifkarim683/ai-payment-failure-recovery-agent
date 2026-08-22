@@ -163,7 +163,7 @@ export default function Home() {
         />
       )}
 
-      {/* Left Navigation Sidebar */}
+      {/* Left Navigation Sidebar (Fixed & Clean) */}
       <aside className={`sidebar ${mobileMenuOpen ? "mobile-open" : ""}`}>
         <div className="brand">
           <div className="brand-mark">
@@ -209,97 +209,6 @@ export default function Home() {
             );
           })}
         </nav>
-
-        <div className="sidebar-bottom">
-          <div className="nav-label">SYSTEM</div>
-          <button
-            className="nav-item"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              toast.info("Active Integrations", {
-                description: "Stripe & Razorpay webhook listeners active.",
-              })
-            }
-            }
-          >
-            <Zap size={17} />
-            <span>Integrations</span>
-            <span className="live-dot" />
-          </button>
-          <button
-            className="nav-item"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              toast.info("Help Center", {
-                description: "Recovery playbooks and policy guidance available.",
-              })
-            }
-            }
-          >
-            <LifeBuoy size={17} />
-            <span>Help center</span>
-          </button>
-
-          {/* User Profile Footer */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="profile w-full hover:bg-slate-800/60 transition-colors rounded-lg p-2 text-left cursor-pointer border-0">
-                <div className="profile-avatar">{initials}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="profile-name truncate">{displayName}</div>
-                  <div className="profile-role truncate">{displayRole}</div>
-                </div>
-                <MoreHorizontal size={16} className="muted" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-slate-900 border-slate-800 text-white">
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-semibold">{displayName}</p>
-                  <p className="text-xs text-slate-400 truncate">{displayEmail}</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-slate-800" />
-              <DropdownMenuLabel className="text-[10px] uppercase text-slate-400 tracking-wider">
-                Switch Persona
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  quickLoginMutation.mutate({ persona: "admin" });
-                }}
-              >
-                <UserCheck size={14} className="mr-2 text-blue-400" /> Eren (Finance Admin)
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  quickLoginMutation.mutate({ persona: "analyst" });
-                }}
-              >
-                <Users size={14} className="mr-2 text-purple-400" /> Maya (Ops Analyst)
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  quickLoginMutation.mutate({ persona: "reviewer" });
-                }}
-              >
-                <ShieldCheck size={14} className="mr-2 text-emerald-400" /> Alex (Reviewer)
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-slate-800" />
-              <DropdownMenuItem
-                className="cursor-pointer text-red-400 hover:bg-red-950/40 focus:bg-red-950/40"
-                onClick={handleLogout}
-              >
-                <LogOut size={14} className="mr-2" /> Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -314,25 +223,58 @@ export default function Home() {
             <Menu size={20} />
             <span>recoverly</span>
           </div>
+
           <div className="breadcrumb">
             <span>Workspace</span>
             <ChevronRight size={14} />
             <strong>{navItems.find(n => n.id === activeTab)?.label}</strong>
           </div>
+
           <div className="topbar-actions">
-            <div className="system-status">
+            {/* Integrations Quick Action */}
+            <button
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-600 text-xs font-medium cursor-pointer transition-colors border border-slate-200"
+              onClick={() =>
+                toast.info("Active Integrations", {
+                  description: "Stripe & Razorpay webhook listeners active.",
+                })
+              }
+            >
+              <Zap size={14} className="text-amber-500" />
+              <span className="hidden sm:inline">Integrations</span>
+              <span className="live-dot ml-0.5" />
+            </button>
+
+            {/* Help Center Quick Action */}
+            <button
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-600 text-xs font-medium cursor-pointer transition-colors border border-slate-200"
+              onClick={() =>
+                toast.info("Help Center", {
+                  description: "Recovery playbooks and policy guidance available.",
+                })
+              }
+            >
+              <LifeBuoy size={14} className="text-blue-500" />
+              <span className="hidden sm:inline">Help</span>
+            </button>
+
+            {/* Live System Status */}
+            <div className="system-status hidden lg:flex">
               <span className="live-dot" />
               Agent online <span className="status-divider" />{" "}
               <span className="small-muted">Synced just now</span>
             </div>
+
+            {/* AI Copilot Trigger */}
             <button
               onClick={() => setCopilotOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 hover:text-blue-600 border border-blue-500/30 text-xs font-semibold cursor-pointer transition-all shadow-sm shadow-blue-500/10"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 hover:text-blue-600 border border-blue-500/30 text-xs font-semibold cursor-pointer transition-all shadow-xs"
             >
               <Sparkles size={14} className="text-blue-500" />
               <span>AI Copilot</span>
             </button>
 
+            {/* Notification Bell */}
             <button
               className="icon-button"
               onClick={() =>
@@ -345,33 +287,57 @@ export default function Home() {
               {pendingApprovalsCount > 0 && <span className="notification-dot" />}
             </button>
 
-            {/* Topbar User Avatar Menu */}
+            {/* Topbar User Profile & Persona Switcher */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="avatar-button cursor-pointer hover:opacity-90 transition-opacity">
-                  {initials}
+                <button className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-xl hover:bg-slate-100 text-left cursor-pointer transition-colors border border-slate-200 bg-slate-50/60">
+                  <div className="avatar-button">{initials}</div>
+                  <div className="hidden md:flex flex-col text-left">
+                    <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[90px]">
+                      {displayName}
+                    </span>
+                    <span className="text-[10px] text-slate-500 leading-tight capitalize truncate max-w-[90px]">
+                      {displayRole}
+                    </span>
+                  </div>
+                  <ChevronRight size={13} className="text-slate-400 rotate-90 hidden md:inline" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white border-slate-200">
+              <DropdownMenuContent align="end" className="w-60 bg-white border-slate-200 text-slate-900 shadow-xl">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-semibold text-slate-800">{displayName}</p>
-                    <p className="text-xs text-slate-500 truncate">{displayEmail}</p>
+                    <p className="text-sm font-semibold">{displayName}</p>
+                    <p className="text-xs text-slate-400 truncate">{displayEmail}</p>
                     <span className="text-[10px] font-bold text-blue-600 uppercase mt-0.5">
                       {displayRole}
                     </span>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-[10px] uppercase text-slate-400 tracking-wider">
+                  Switch Persona
+                </DropdownMenuLabel>
                 <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setLocation("/login")}
+                  className="cursor-pointer hover:bg-slate-50"
+                  onClick={() => quickLoginMutation.mutate({ persona: "admin" })}
                 >
-                  <Users size={14} className="mr-2 text-slate-600" /> Switch / Sign In Page
+                  <UserCheck size={14} className="mr-2 text-blue-600" /> Eren (Finance Admin)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer hover:bg-slate-50"
+                  onClick={() => quickLoginMutation.mutate({ persona: "analyst" })}
+                >
+                  <Users size={14} className="mr-2 text-purple-600" /> Maya (Ops Analyst)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer hover:bg-slate-50"
+                  onClick={() => quickLoginMutation.mutate({ persona: "reviewer" })}
+                >
+                  <ShieldCheck size={14} className="mr-2 text-emerald-600" /> Alex (Reviewer)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="cursor-pointer text-red-600"
+                  className="cursor-pointer text-red-600 hover:bg-red-50 focus:bg-red-50"
                   onClick={handleLogout}
                 >
                   <LogOut size={14} className="mr-2" /> Sign Out
