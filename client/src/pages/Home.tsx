@@ -38,6 +38,7 @@ import { ReplayLabTab } from "@/components/recovery/ReplayLabTab";
 import { ReportsTab } from "@/components/recovery/ReportsTab";
 import { DecisionTraceDrawer } from "@/components/recovery/DecisionTraceDrawer";
 import { SimulatePaymentModal } from "@/components/recovery/SimulatePaymentModal";
+import { AICopilotDrawer } from "@/components/recovery/AICopilotDrawer";
 import { getInitials } from "@/components/recovery/recoveryUtils";
 
 export default function Home() {
@@ -47,6 +48,7 @@ export default function Home() {
   const [selectedCase, setSelectedCase] = useState<RecoveryCase | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [simulateOpen, setSimulateOpen] = useState(false);
+  const [copilotOpen, setCopilotOpen] = useState(false);
   const [running, setRunning] = useState(false);
 
   const utils = trpc.useUtils();
@@ -294,6 +296,14 @@ export default function Home() {
               <span className="small-muted">Synced just now</span>
             </div>
             <button
+              onClick={() => setCopilotOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 hover:text-blue-600 border border-blue-500/30 text-xs font-semibold cursor-pointer transition-all shadow-sm shadow-blue-500/10"
+            >
+              <Sparkles size={14} className="text-blue-500" />
+              <span>AI Copilot</span>
+            </button>
+
+            <button
               className="icon-button"
               onClick={() =>
                 toast.info("System Status", {
@@ -383,6 +393,21 @@ export default function Home() {
           {activeTab === "reports" && <ReportsTab totalRecovered={totalRecovered} />}
         </div>
       </main>
+
+      {/* Floating AI Copilot Launcher */}
+      <button
+        onClick={() => setCopilotOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-lg shadow-blue-500/30 cursor-pointer transition-all hover:scale-105 border border-blue-400/40"
+      >
+        <Sparkles size={15} />
+        <span>Ask Recoverly Copilot</span>
+      </button>
+
+      {/* AI Copilot Drawer */}
+      <AICopilotDrawer
+        open={copilotOpen}
+        onOpenChange={setCopilotOpen}
+      />
 
       {/* Decision Trace Drawer */}
       <DecisionTraceDrawer

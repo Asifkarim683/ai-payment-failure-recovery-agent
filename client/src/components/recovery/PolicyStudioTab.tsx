@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { PolicySimulatorModal } from "./PolicySimulatorModal";
+import { AIPolicyAdvisor } from "./AIPolicyAdvisor";
 
 export function PolicyStudioTab() {
   const [retry, setRetry] = useState("2");
@@ -61,6 +62,13 @@ export function PolicyStudioTab() {
     });
   };
 
+  const handleApplyAdvisor = (changes: any) => {
+    if (changes.amountCeiling) setCeiling(String(changes.amountCeiling));
+    if (changes.confidenceFloor) setFloor(Math.round(changes.confidenceFloor * 100));
+    if (changes.maxRetries) setRetry(String(changes.maxRetries));
+    setPolicySaved(false);
+  };
+
   return (
     <>
       <div className="page-header">
@@ -90,6 +98,11 @@ export function PolicyStudioTab() {
               : "Publish changes"}
           </Button>
         </div>
+      </div>
+
+      {/* AI Policy Optimization Advisor Banner */}
+      <div className="mb-4">
+        <AIPolicyAdvisor onApplyRecommendation={handleApplyAdvisor} />
       </div>
 
       <div className="policy-layout">

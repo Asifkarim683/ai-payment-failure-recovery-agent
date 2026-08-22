@@ -24,6 +24,12 @@ import type { RecoveryReport } from "@shared/types";
 import { ONE_YEAR_MS } from "@shared/const";
 import { sdk } from "./_core/sdk";
 import { getUserByEmail, getUserByOpenId, upsertUser } from "./db";
+import {
+  chatWithFinanceCopilot,
+  generateAIDiagnosis,
+  generatePolicyAdvice,
+  generateRecoveryNudge,
+} from "./ai.service";
 
 export const appRouter = router({
   system: systemRouter,
@@ -403,6 +409,89 @@ export const appRouter = router({
       };
       await updateRunMetrics(newRun);
       return newRun;
+    }),
+  }),
+
+  ai: router({
+    diagnose: publicProcedure
+      .input(
+        z.object({
+          id: z.string(),
+          merchantName: z.string(),
+          amount: z.number(),
+          declineCode: z.string(),
+          attemptCount: z.number().default(0),
+        })
+      )
+      .mutation(async ({ input }) => {
+        return generateAIDiagnosis(input);
+      }),
+
+    generateNudge: publicProcedure
+      .input(
+        z.object({
+          caseId: z.string(),
+          channel: z.enum(["email", "whatsapp", "sms"]).default("email"),
+          tone: z.enum(["concierge", "urgent", "security_first", "friendly"]).default("concierge"),
+          discountPercent: z.number().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const foundCase = await getCaseById(input.caseId);
+        if (!foundCase) {
+          throw new Error(`Case ${input.caseId} not found`);
+        }
+        return generateRecoveryNudge({
+          caseData: foundCase,
+          channel: input.channel,
+          tone: input.tone,
+          discountPercent: input.discountPercent,
+        });
+      }),
+
+    copilotChat: publicProcedure
+      .input(
+        z.object({
+          message: z.string().min(1),
+          history: z
+            .array(z.object({ role: z.enum(["user", "model"]), text: z.string() }))
+            .optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const [cases, policies, run] = await Promise.all([
+          getAllCases(),
+          getPolicyRules(),
+          getLatestRun(),
+        ]);
+        const totalRecovered =
+          run?.totalRecovered ??
+          cases
+            .filter(c => c.actionResult === "recovered")
+            .reduce((sum, c) => sum + (c.amountRecovered || c.amount), 0);
+
+        return chatWithFinanceCopilot({
+          message: input.message,
+          history: input.history,
+          cases,
+          policies,
+          totalRecovered,
+        });
+      }),
+
+    policyAdvisor: publicProcedure.query(async () => {
+      const [cases, policies] = await Promise.all([getAllCases(), getPolicyRules()]);
+      const activePolicy = policies[0] ?? {
+        id: "pol_def",
+        rootCause: "all",
+        amountCeiling: 10000,
+        confidenceFloor: 0.82,
+        maxRetries: 2,
+        cooldownMinutes: 240,
+        channels: ["email", "sms", "link"],
+        requiresApproval: false,
+      };
+      return generatePolicyAdvice(cases, activePolicy);
     }),
   }),
 });
