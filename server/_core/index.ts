@@ -46,8 +46,9 @@ async function startServer() {
       createContext,
     })
   );
-  // development mode uses Vite, production mode uses static files
-  if (process.env.NODE_ENV === "development") {
+  // development mode with tsx uses Vite, production or built bundle uses static files
+  const isDev = process.env.NODE_ENV === "development" && !process.argv[1]?.includes("dist");
+  if (isDev) {
     await setupVite(app, server);
   } else {
     serveStatic(app);
