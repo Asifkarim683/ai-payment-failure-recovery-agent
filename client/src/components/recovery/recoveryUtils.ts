@@ -49,20 +49,40 @@ export function getStatusStyle(status?: string): { className: string; label: str
   switch (status) {
     case "recovered":
     case "Recovered":
-      return { className: "status-success", label: "Recovered" };
+      return {
+        className:
+          "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-xs",
+        label: "Recovered",
+      };
     case "needs_approval":
     case "Needs approval":
-      return { className: "status-warning", label: "Needs approval" };
+      return {
+        className:
+          "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-xs",
+        label: "Needs approval",
+      };
     case "rejected":
     case "Rejected":
-      return { className: "status-rejected", label: "Rejected" };
+      return {
+        className:
+          "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shadow-xs",
+        label: "Rejected",
+      };
     case "at_risk":
     case "At risk":
-      return { className: "status-rejected", label: "At risk" };
+      return {
+        className:
+          "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 shadow-xs",
+        label: "At risk",
+      };
     case "processing":
     case "In progress":
     default:
-      return { className: "status-progress", label: "In progress" };
+      return {
+        className:
+          "inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-xs",
+        label: "In progress",
+      };
   }
 }
 
