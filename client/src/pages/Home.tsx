@@ -354,6 +354,7 @@ export default function Home() {
         <div className="page-wrap">
           {activeTab === "overview" && (
             <OverviewTab
+              userName={user?.name}
               running={running}
               onStartRun={handleStartRun}
               onOpenSimulateModal={() => setSimulateOpen(true)}

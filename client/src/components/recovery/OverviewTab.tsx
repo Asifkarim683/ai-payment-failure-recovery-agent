@@ -29,6 +29,7 @@ import {
 } from "./recoveryUtils";
 
 interface OverviewTabProps {
+  userName?: string | null;
   running: boolean;
   onStartRun: () => void;
   onOpenSimulateModal: () => void;
@@ -40,7 +41,21 @@ interface OverviewTabProps {
   loading: boolean;
 }
 
+function getTimeBasedGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) {
+    return "Good morning";
+  } else if (hour >= 12 && hour < 17) {
+    return "Good afternoon";
+  } else if (hour >= 17 && hour < 22) {
+    return "Good evening";
+  } else {
+    return "Good evening";
+  }
+}
+
 export function OverviewTab({
+  userName,
   running,
   onStartRun,
   onOpenSimulateModal,
@@ -57,6 +72,9 @@ export function OverviewTab({
   const recoveryRate =
     totalAtRisk > 0 ? ((totalRecovered / totalAtRisk) * 100).toFixed(1) : "68.2";
 
+  const greeting = getTimeBasedGreeting();
+  const firstName = userName ? userName.split(" ")[0] : "Eren";
+
   return (
     <>
       {loading && (
@@ -69,7 +87,7 @@ export function OverviewTab({
       <div className="page-header">
         <div>
           <div className="eyebrow">REVENUE OPERATIONS DASHBOARD</div>
-          <h1>Good morning, Eren</h1>
+          <h1>{greeting}, {firstName}</h1>
           <p>Here’s the latest signal on revenue at risk across your payment flows.</p>
         </div>
         <div className="flex items-center gap-2">
