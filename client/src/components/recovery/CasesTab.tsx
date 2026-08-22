@@ -28,9 +28,8 @@ export function CasesTab({
 
   const filteredCases = useMemo(() => {
     return cases.filter(c => {
-      const matchesQuery = `${c.merchantName} ${c.rootCause} ${c.id} ${c.declineCode}`
-        .toLowerCase()
-        .includes(query.toLowerCase());
+      const searchTarget = `${c.merchantName || ""} ${c.rootCause || ""} ${c.id || ""} ${c.declineCode || ""}`.toLowerCase();
+      const matchesQuery = searchTarget.includes(query.toLowerCase());
 
       if (!matchesQuery) return false;
 

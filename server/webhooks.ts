@@ -196,11 +196,20 @@ export async function processPaymentFailureEvent(
 // Webhook HTTP Handler
 webhookRouter.post("/payment", async (req: Request, res: Response) => {
   try {
-    const provider = req.headers["x-provider"] as "stripe" | "razorpay" | "custom" || "custom";
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      res.status(400).json({ error: "Invalid webhook payload: Expected JSON object." });
+      return;
+    }
+    const rawProvider = (req.headers["x-provider"] as string | undefined)?.toLowerCase();
+    const provider: "stripe" | "razorpay" | "custom" =
+      rawProvider === "stripe" || rawProvider === "razorpay" || rawProvider === "custom"
+        ? rawProvider
+        : "custom";
+
     const result = await processPaymentFailureEvent(req.body, provider);
     res.status(200).json({ status: "processed", result });
   } catch (error: any) {
     console.error("[Webhook Error]", error);
-    res.status(500).json({ error: error.message || "Failed to process webhook" });
+    res.status(500).json({ error: "Failed to process payment failure event" });
   }
 });

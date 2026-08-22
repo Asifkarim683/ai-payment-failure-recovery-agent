@@ -24,6 +24,21 @@ interface Message {
   text: string;
 }
 
+function renderSafeMarkdown(text: string) {
+  const escaped = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+  return escaped
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`([^`]+)`/g, "<code class='bg-slate-900 px-1 py-0.5 rounded text-blue-300 font-mono'>$1</code>")
+    .replace(/\n/g, "<br/>");
+}
+
 export function AICopilotDrawer({ open, onOpenChange }: AICopilotDrawerProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -122,11 +137,7 @@ export function AICopilotDrawer({ open, onOpenChange }: AICopilotDrawerProps) {
                 <div
                   className="prose prose-invert prose-sm max-w-none text-xs"
                   dangerouslySetInnerHTML={{
-                    __html: m.text
-                      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                      .replace(/\*(.*?)\*/g, "<em>$1</em>")
-                      .replace(/`([^`]+)`/g, "<code class='bg-slate-900 px-1 py-0.5 rounded text-blue-300'>$1</code>")
-                      .replace(/\n/g, "<br/>"),
+                    __html: renderSafeMarkdown(m.text),
                   }}
                 />
               </div>

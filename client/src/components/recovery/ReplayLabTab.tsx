@@ -106,7 +106,7 @@ export function ReplayLabTab({ cases, onSelectCase }: ReplayLabTabProps) {
         <div className="panel replay-stage">
           <div className="replay-case">
             <div className="eyebrow">SELECTED TRANSACTION TELEMETRY</div>
-            {targetCase && (
+            {targetCase ? (
               <div className="case-cell">
                 <div className="merchant-avatar amber">
                   {getInitials(targetCase.merchantName)}
@@ -117,6 +117,10 @@ export function ReplayLabTab({ cases, onSelectCase }: ReplayLabTabProps) {
                     {targetCase.id} · {formatMoney(targetCase.amount)} at risk
                   </span>
                 </div>
+              </div>
+            ) : (
+              <div className="text-xs text-muted-foreground py-2">
+                No active transaction selected. Simulate a payment failure to start a replay.
               </div>
             )}
           </div>
