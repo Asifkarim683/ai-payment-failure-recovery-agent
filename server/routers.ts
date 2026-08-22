@@ -2,7 +2,7 @@ import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
 import {
   decideApproval as dbDecideApproval,
   getAllApprovals,
@@ -35,9 +35,7 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(async ({ ctx }) => {
-      // If no session user from cookie, return default admin persona for initial load or null
-      if (ctx.user) return ctx.user;
-      return getUserByOpenId("user_eren_admin");
+      return ctx.user ?? null;
     }),
 
     login: publicProcedure
@@ -73,6 +71,15 @@ export const appRouter = router({
         ctx.res.cookie(COOKIE_NAME, sessionToken, {
           ...cookieOptions,
           maxAge: ONE_YEAR_MS,
+        });
+
+        await logAuditEvent({
+          id: `aud_auth_${Date.now()}`,
+          eventId: "sys_auth",
+          stepName: "audit",
+          detail: `User ${user?.name || openId} authenticated successfully via credentials. Role: ${input.role.toUpperCase()}`,
+          state: "done",
+          timestamp: Date.now(),
         });
 
         return { success: true, user, token: sessionToken };
@@ -124,17 +131,38 @@ export const appRouter = router({
           maxAge: ONE_YEAR_MS,
         });
 
+        await logAuditEvent({
+          id: `aud_auth_${Date.now()}`,
+          eventId: "sys_auth",
+          stepName: "audit",
+          detail: `Quick login active for persona: ${target.name} (${target.role.toUpperCase()})`,
+          state: "done",
+          timestamp: Date.now(),
+        });
+
         return { success: true, user, token: sessionToken };
       }),
 
-    logout: publicProcedure.mutation(({ ctx }) => {
+    logout: publicProcedure.mutation(async ({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+
+      if (ctx.user) {
+        await logAuditEvent({
+          id: `aud_auth_${Date.now()}`,
+          eventId: "sys_auth",
+          stepName: "audit",
+          detail: `User ${ctx.user.name || ctx.user.email} signed out from workspace`,
+          state: "done",
+          timestamp: Date.now(),
+        });
+      }
+
       return { success: true } as const;
     }),
   }),
   recovery: router({
-    overview: publicProcedure.query(async () => {
+    overview: protectedProcedure.query(async () => {
       const [run, cases, approvals, policy] = await Promise.all([
         getLatestRun(),
         getAllCases(),
@@ -144,7 +172,7 @@ export const appRouter = router({
       return { run, cases, approvals, policy };
     }),
 
-    listCases: publicProcedure
+    listCases: protectedProcedure
       .input(
         z
           .object({
@@ -179,23 +207,23 @@ export const appRouter = router({
         return cases;
       }),
 
-    getCase: publicProcedure
+    getCase: protectedProcedure
       .input(z.object({ id: z.string() }))
       .query(async ({ input }) => {
         return getCaseById(input.id);
       }),
 
-    getCaseAuditTrail: publicProcedure
+    getCaseAuditTrail: protectedProcedure
       .input(z.object({ eventId: z.string() }))
       .query(async ({ input }) => {
         return getAuditEventsByCaseId(input.eventId);
       }),
 
-    approvals: publicProcedure.query(async () => {
+    approvals: protectedProcedure.query(async () => {
       return getAllApprovals();
     }),
 
-    decideApproval: publicProcedure
+    decideApproval: protectedProcedure
       .input(
         z.object({
           id: z.string(),
@@ -231,11 +259,11 @@ export const appRouter = router({
         return approval;
       }),
 
-    policy: publicProcedure.query(async () => {
+    policy: protectedProcedure.query(async () => {
       return getPolicyRules();
     }),
 
-    updatePolicy: publicProcedure
+    updatePolicy: adminProcedure
       .input(
         z.object({
           maxRetries: z.number().int().min(0).max(10),
@@ -249,7 +277,7 @@ export const appRouter = router({
         return updatePolicyRules(input);
       }),
 
-    simulatePolicy: publicProcedure
+    simulatePolicy: protectedProcedure
       .input(
         z.object({
           maxRetries: z.number().int().min(0).max(10),
@@ -263,7 +291,7 @@ export const appRouter = router({
         return simulatePolicyImpact(cases, input);
       }),
 
-    replay: publicProcedure
+    replay: protectedProcedure
       .input(z.object({ runId: z.string(), eventId: z.string() }))
       .query(async ({ input }) => {
         const [event, auditLogs] = await Promise.all([
@@ -278,7 +306,7 @@ export const appRouter = router({
         };
       }),
 
-    report: publicProcedure.query(async (): Promise<RecoveryReport> => {
+    report: protectedProcedure.query(async (): Promise<RecoveryReport> => {
       const [run, cases, approvals] = await Promise.all([
         getLatestRun(),
         getAllCases(),
@@ -337,7 +365,7 @@ export const appRouter = router({
       };
     }),
 
-    exportReport: publicProcedure
+    exportReport: protectedProcedure
       .input(z.object({ format: z.enum(["csv", "json"]).default("csv") }))
       .query(async ({ input }) => {
         const cases = await getAllCases();
@@ -384,7 +412,7 @@ export const appRouter = router({
         };
       }),
 
-    ingestTestPayment: publicProcedure
+    ingestTestPayment: protectedProcedure
       .input(
         z.object({
           merchantName: z.string().min(1),
@@ -396,7 +424,7 @@ export const appRouter = router({
         return processPaymentFailureEvent(input, "custom");
       }),
 
-    startRun: publicProcedure.mutation(async () => {
+    startRun: protectedProcedure.mutation(async () => {
       const now = Date.now();
       const newRun = {
         id: `run_${new Date().toISOString().replace(/[-:T.]/g, "_").slice(0, 19)}`,
@@ -413,7 +441,7 @@ export const appRouter = router({
   }),
 
   ai: router({
-    diagnose: publicProcedure
+    diagnose: protectedProcedure
       .input(
         z.object({
           id: z.string(),
@@ -427,7 +455,7 @@ export const appRouter = router({
         return generateAIDiagnosis(input);
       }),
 
-    generateNudge: publicProcedure
+    generateNudge: protectedProcedure
       .input(
         z.object({
           caseId: z.string(),
@@ -449,7 +477,7 @@ export const appRouter = router({
         });
       }),
 
-    copilotChat: publicProcedure
+    copilotChat: protectedProcedure
       .input(
         z.object({
           message: z.string().min(1),
@@ -479,7 +507,7 @@ export const appRouter = router({
         });
       }),
 
-    policyAdvisor: publicProcedure.query(async () => {
+    policyAdvisor: protectedProcedure.query(async () => {
       const [cases, policies] = await Promise.all([getAllCases(), getPolicyRules()]);
       const activePolicy = policies[0] ?? {
         id: "pol_def",

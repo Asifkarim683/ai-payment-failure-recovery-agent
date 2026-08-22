@@ -14,9 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -24,6 +26,11 @@ export default function Login() {
   const [isCustomMode, setIsCustomMode] = useState(false);
 
   const utils = trpc.useUtils();
+
+  if (!authLoading && isAuthenticated && user) {
+    setLocation("/");
+    return null;
+  }
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: (data) => {

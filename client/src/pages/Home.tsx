@@ -43,7 +43,10 @@ import { getInitials } from "@/components/recovery/recoveryUtils";
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, loading, isAuthenticated } = useAuth({
+    redirectOnUnauthenticated: true,
+    redirectPath: "/login",
+  });
   const [activeTab, setActiveTab] = useState<string>("overview");
   const [selectedCase, setSelectedCase] = useState<RecoveryCase | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -54,8 +57,9 @@ export default function Home() {
 
   const utils = trpc.useUtils();
 
-  // Queries & Mutations
+  // Queries & Mutations (enabled only when authenticated)
   const overviewQuery = trpc.recovery.overview.useQuery(undefined, {
+    enabled: !!user && isAuthenticated,
     refetchInterval: 5000,
   });
 
