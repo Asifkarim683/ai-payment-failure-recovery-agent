@@ -90,15 +90,19 @@ export function OverviewTab({
           <h1>{greeting}, {firstName}</h1>
           <p>Here’s the latest signal on revenue at risk across your payment flows.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
           <Button
             variant="outline"
-            className="text-xs h-9 font-semibold"
+            className="text-xs h-9 font-semibold flex-1 sm:flex-initial"
             onClick={onOpenSimulateModal}
           >
             <PlusCircle size={15} /> Simulate Payment Failure
           </Button>
-          <Button onClick={onStartRun} className="primary-action" disabled={running}>
+          <Button
+            onClick={onStartRun}
+            className="primary-action flex-1 sm:flex-initial"
+            disabled={running}
+          >
             <Play size={15} fill="currentColor" />
             {running ? "Running recovery…" : "Run recovery agent"}
           </Button>

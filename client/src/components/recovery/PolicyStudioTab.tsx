@@ -77,16 +77,16 @@ export function PolicyStudioTab() {
           <h1>Policy studio</h1>
           <p>Shape the operational boundaries your recovery agent must operate within.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
           <Button
             variant="outline"
-            className="text-xs h-9 font-semibold"
+            className="text-xs h-9 font-semibold flex-1 sm:flex-initial"
             onClick={() => setSimulatorOpen(true)}
           >
             <Sparkles size={15} /> Policy Sandbox
           </Button>
           <Button
-            className="primary-action"
+            className="primary-action flex-1 sm:flex-initial"
             onClick={handlePublish}
             disabled={updatePolicy.isPending}
           >

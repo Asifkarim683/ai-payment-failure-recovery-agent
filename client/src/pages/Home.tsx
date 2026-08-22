@@ -49,6 +49,7 @@ export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [simulateOpen, setSimulateOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [running, setRunning] = useState(false);
 
   const utils = trpc.useUtils();
@@ -154,25 +155,33 @@ export default function Home() {
 
   return (
     <div className="app-shell">
-      {/* Sidebar */}
-      <aside className="sidebar">
+      {/* Mobile Drawer Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-overlay"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Left Navigation Sidebar */}
+      <aside className={`sidebar ${mobileMenuOpen ? "mobile-open" : ""}`}>
         <div className="brand">
           <div className="brand-mark">
-            <Sparkles size={17} />
+            <Sparkles size={16} />
           </div>
           <div>
             <div className="brand-name">
               recover<span>ly</span>
             </div>
-            <div className="brand-caption">REVENUE OPERATIONS</div>
+            <div className="brand-caption">AUTONOMOUS RECOVERY</div>
           </div>
         </div>
 
         <div className="workspace">
           <div className="workspace-avatar">AC</div>
-          <div>
-            <div className="workspace-name">Acme Commerce</div>
-            <div className="workspace-sub">Production workspace</div>
+          <div className="min-w-0 flex-1">
+            <div className="workspace-name truncate">Acme Commerce</div>
+            <div className="workspace-sub truncate">Production workspace</div>
           </div>
           <ChevronRight size={14} className="muted" />
         </div>
@@ -186,7 +195,10 @@ export default function Home() {
               <button
                 key={item.id}
                 className={`nav-item ${isActive ? "active" : ""}`}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setMobileMenuOpen(false);
+                }}
               >
                 <Icon size={17} />
                 <span>{item.label}</span>
@@ -202,10 +214,12 @@ export default function Home() {
           <div className="nav-label">SYSTEM</div>
           <button
             className="nav-item"
-            onClick={() =>
+            onClick={() => {
+              setMobileMenuOpen(false);
               toast.info("Active Integrations", {
                 description: "Stripe & Razorpay webhook listeners active.",
               })
+            }
             }
           >
             <Zap size={17} />
@@ -214,10 +228,12 @@ export default function Home() {
           </button>
           <button
             className="nav-item"
-            onClick={() =>
+            onClick={() => {
+              setMobileMenuOpen(false);
               toast.info("Help Center", {
                 description: "Recovery playbooks and policy guidance available.",
               })
+            }
             }
           >
             <LifeBuoy size={17} />
@@ -249,19 +265,28 @@ export default function Home() {
               </DropdownMenuLabel>
               <DropdownMenuItem
                 className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
-                onClick={() => quickLoginMutation.mutate({ persona: "admin" })}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  quickLoginMutation.mutate({ persona: "admin" });
+                }}
               >
                 <UserCheck size={14} className="mr-2 text-blue-400" /> Eren (Finance Admin)
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
-                onClick={() => quickLoginMutation.mutate({ persona: "analyst" })}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  quickLoginMutation.mutate({ persona: "analyst" });
+                }}
               >
                 <Users size={14} className="mr-2 text-purple-400" /> Maya (Ops Analyst)
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer hover:bg-slate-800 focus:bg-slate-800"
-                onClick={() => quickLoginMutation.mutate({ persona: "reviewer" })}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  quickLoginMutation.mutate({ persona: "reviewer" });
+                }}
               >
                 <ShieldCheck size={14} className="mr-2 text-emerald-400" /> Alex (Reviewer)
               </DropdownMenuItem>
@@ -280,8 +305,13 @@ export default function Home() {
       {/* Main Content Area */}
       <main className="main-content">
         <header className="topbar">
-          <div className="mobile-brand">
-            <Menu size={18} />
+          <div
+            className="mobile-brand"
+            onClick={() => setMobileMenuOpen(prev => !prev)}
+            role="button"
+            tabIndex={0}
+          >
+            <Menu size={20} />
             <span>recoverly</span>
           </div>
           <div className="breadcrumb">

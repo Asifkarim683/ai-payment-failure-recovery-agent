@@ -63,23 +63,23 @@ export function DecisionTraceDrawer({
   return (
     <>
       <Sheet open={open && !!selectedCase} onOpenChange={onOpenChange}>
-        <SheetContent className="trace-drawer">
-          <SheetHeader>
+        <SheetContent className="trace-drawer w-full sm:max-w-md md:max-w-lg overflow-y-auto">
+          <SheetHeader className="pr-10">
             <div className="drawer-kicker flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <span className="live-dot" /> DECISION TRACE
+              <span className="flex items-center gap-1.5 font-bold tracking-wider text-[10px] text-blue-600 dark:text-blue-400 uppercase">
+                <span className="live-dot" /> Decision Trace
               </span>
-              <span className="text-[10px] bg-blue-500/10 text-blue-400 font-bold px-1.5 py-0.5 rounded border border-blue-500/20">
-                Gemini 2.5 Active
+              <span className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold px-2 py-0.5 rounded-full border border-blue-500/25">
+                Gemini 3.5 Active
               </span>
             </div>
-            <SheetTitle>{selectedCase.merchantName}</SheetTitle>
-            <p className="drawer-subtitle">
+            <SheetTitle className="text-xl font-bold mt-1 text-slate-900">{selectedCase.merchantName}</SheetTitle>
+            <p className="drawer-subtitle text-xs text-slate-500">
               {selectedCase.id} · {new Date(selectedCase.createdAt).toLocaleTimeString()}
             </p>
           </SheetHeader>
 
-          <div className="drawer-content">
+          <div className="drawer-content space-y-5">
             {/* Amount at risk */}
             <div className="drawer-amount">
               <div>
@@ -91,12 +91,11 @@ export function DecisionTraceDrawer({
 
             {/* Generative Outreach Button */}
             <Button
-              variant="outline"
               size="sm"
               onClick={() => setNudgeOpen(true)}
-              className="w-full bg-blue-950/40 border-blue-800/60 hover:bg-blue-900/60 text-blue-300 text-xs font-semibold h-9"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-sm transition-all h-9 text-xs"
             >
-              <Sparkles size={14} className="text-blue-400 mr-1.5" />
+              <Sparkles size={14} className="mr-1.5" />
               Draft AI Recovery Nudge (Email / WhatsApp)
             </Button>
 

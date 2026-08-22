@@ -56,18 +56,19 @@ export function CasesTab({
       </div>
 
       {/* Toolbar */}
-      <div className="toolbar">
-        <div className="flex items-center gap-3">
-          <div className="search-wrap">
-            <Search size={16} />
+      <div className="toolbar flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+          <div className="search-wrap w-full sm:w-72">
+            <Search size={15} />
             <Input
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Search cases, merchants, or decline codes..."
+              placeholder="Search cases, merchants, codes..."
+              className="text-xs"
             />
           </div>
 
-          <div className="flex gap-1 bg-white p-1 rounded-lg border border-slate-200 text-xs">
+          <div className="flex flex-wrap gap-1 bg-white p-1 rounded-lg border border-slate-200 text-xs max-w-full overflow-x-auto">
             {[
               { id: "all", label: "All Cases" },
               { id: "needs_approval", label: "Needs Approval" },
@@ -78,7 +79,7 @@ export function CasesTab({
               <button
                 key={tab.id}
                 onClick={() => setStatusFilter(tab.id)}
-                className={`px-3 py-1 rounded-md transition-all font-medium ${
+                className={`px-3 py-1 rounded-md transition-all font-medium whitespace-nowrap ${
                   statusFilter === tab.id
                     ? "bg-blue-600 text-white shadow-sm"
                     : "text-slate-600 hover:bg-slate-100"
@@ -90,7 +91,7 @@ export function CasesTab({
           </div>
         </div>
 
-        <div className="toolbar-meta">
+        <div className="toolbar-meta text-xs text-slate-500 whitespace-nowrap">
           {filteredCases.length} displayed · {cases.length} total events
         </div>
       </div>
