@@ -10,12 +10,9 @@ import {
   LifeBuoy,
   LogOut,
   Menu,
-  MoreHorizontal,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
-  UserCheck,
-  Users,
   Zap,
 } from "lucide-react";
 import {
@@ -79,15 +76,6 @@ export default function Home() {
     onError: () => {
       toast.error("Approval update failed", {
         description: "The case status was not changed. Please retry.",
-      });
-    },
-  });
-
-  const quickLoginMutation = trpc.auth.quickLogin.useMutation({
-    onSuccess: (data) => {
-      utils.auth.me.setData(undefined, data.user as any);
-      toast.success("Switched user persona", {
-        description: `Active session: ${data.user?.name} (${data.user?.role?.toUpperCase()})`,
       });
     },
   });
@@ -291,7 +279,7 @@ export default function Home() {
               {pendingApprovalsCount > 0 && <span className="notification-dot" />}
             </button>
 
-            {/* Topbar User Profile & Persona Switcher */}
+            {/* Topbar User Profile */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-xl hover:bg-slate-100 text-left cursor-pointer transition-colors border border-slate-200 bg-slate-50/60">
@@ -307,38 +295,21 @@ export default function Home() {
                   <ChevronRight size={13} className="text-slate-400 rotate-90 hidden md:inline" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60 bg-white border-slate-200 text-slate-900 shadow-xl">
+              <DropdownMenuContent align="end" className="w-56 bg-white border-slate-200 text-slate-900 shadow-xl">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-semibold">{displayName}</p>
                     <p className="text-xs text-slate-400 truncate">{displayEmail}</p>
-                    <span className="text-[10px] font-bold text-blue-600 uppercase mt-0.5">
-                      {displayRole}
-                    </span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[10px] font-bold text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
+                        {displayRole}
+                      </span>
+                      <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200/60 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active Session
+                      </span>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-[10px] uppercase text-slate-400 tracking-wider">
-                  Switch Persona
-                </DropdownMenuLabel>
-                <DropdownMenuItem
-                  className="cursor-pointer hover:bg-slate-50"
-                  onClick={() => quickLoginMutation.mutate({ persona: "admin" })}
-                >
-                  <UserCheck size={14} className="mr-2 text-blue-600" /> Eren (Finance Admin)
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer hover:bg-slate-50"
-                  onClick={() => quickLoginMutation.mutate({ persona: "analyst" })}
-                >
-                  <Users size={14} className="mr-2 text-purple-600" /> Maya (Ops Analyst)
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer hover:bg-slate-50"
-                  onClick={() => quickLoginMutation.mutate({ persona: "reviewer" })}
-                >
-                  <ShieldCheck size={14} className="mr-2 text-emerald-600" /> Alex (Reviewer)
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer text-red-600 hover:bg-red-50 focus:bg-red-50"

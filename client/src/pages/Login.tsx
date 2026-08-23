@@ -8,7 +8,9 @@ import {
   User,
   ArrowRight,
   RefreshCw,
-  CheckCircle2,
+  Eye,
+  EyeOff,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +25,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<"admin" | "user">("admin");
-  const [isCustomMode, setIsCustomMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -47,25 +49,10 @@ export default function Login() {
     },
   });
 
-  const quickLoginMutation = trpc.auth.quickLogin.useMutation({
-    onSuccess: (data) => {
-      utils.auth.me.setData(undefined, data.user as any);
-      toast.success("Signed in successfully", {
-        description: `Active session: ${data.user?.name} (${data.user?.role?.toUpperCase()})`,
-      });
-      setLocation("/");
-    },
-    onError: (err: any) => {
-      toast.error("Quick sign-in failed", {
-        description: err.message || "Please try again.",
-      });
-    },
-  });
-
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Please fill in all required fields.");
+      toast.error("Please provide both email and password.");
       return;
     }
     loginMutation.mutate({
@@ -76,11 +63,17 @@ export default function Login() {
     });
   };
 
-  const handleQuickPersona = (persona: "admin" | "analyst" | "reviewer") => {
-    quickLoginMutation.mutate({ persona });
+  const handleFillSample = (sampleEmail: string, sampleRole: "admin" | "user", sampleName: string) => {
+    setEmail(sampleEmail);
+    setPassword("password123");
+    setName(sampleName);
+    setRole(sampleRole);
+    toast.info("Sample credentials filled", {
+      description: "Click 'Sign In to Workspace' to proceed.",
+    });
   };
 
-  const isPending = loginMutation.isPending || quickLoginMutation.isPending;
+  const isPending = loginMutation.isPending;
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
@@ -89,7 +82,7 @@ export default function Login() {
       <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 relative z-10 text-white">
-        {/* Brand */}
+        {/* Brand Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
             <Sparkles size={20} />
@@ -99,109 +92,67 @@ export default function Login() {
               recover<span className="text-blue-400">ly</span>
             </div>
             <div className="text-[10px] tracking-widest uppercase text-slate-400 font-semibold">
-              Revenue Operations
+              Autonomous Recovery
             </div>
           </div>
         </div>
 
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-slate-100">
-            Sign in to Workspace
+            Sign In to Workspace
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Access autonomous payment recovery workflows and policy governance.
+            Enter your credentials to access autonomous payment recovery and governance.
           </p>
         </div>
 
-        {/* 1-Click Fast Persona Switcher */}
-        {!isCustomMode ? (
-          <div className="space-y-4">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Select a Team Persona
+        {/* Credentials Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300">
+              Work Email <span className="text-red-400">*</span>
+            </label>
+            <div className="relative">
+              <Mail size={15} className="absolute left-3 top-3 text-slate-500" />
+              <Input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="name@company.com"
+                required
+                className="pl-9 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
+              />
             </div>
+          </div>
 
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                onClick={() => handleQuickPersona("admin")}
-                disabled={isPending}
-                className="w-full flex items-center justify-between p-3.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 hover:border-blue-500 transition-all text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-blue-600/30 border border-blue-500/40 text-blue-300 font-bold flex items-center justify-center text-xs">
-                    ER
-                  </div>
-                  <div>
-                    <strong className="block text-sm font-semibold text-slate-100 group-hover:text-blue-300">
-                      Eren Rocha
-                    </strong>
-                    <span className="text-xs text-slate-400">
-                      Finance Admin · Full Policy & Approval Access
-                    </span>
-                  </div>
-                </div>
-                <ArrowRight size={16} className="text-slate-500 group-hover:text-blue-400 transition-colors" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickPersona("analyst")}
-                disabled={isPending}
-                className="w-full flex items-center justify-between p-3.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 hover:border-blue-500 transition-all text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 font-bold flex items-center justify-center text-xs">
-                    MP
-                  </div>
-                  <div>
-                    <strong className="block text-sm font-semibold text-slate-100 group-hover:text-purple-300">
-                      Maya Patel
-                    </strong>
-                    <span className="text-xs text-slate-400">
-                      Recovery Ops Analyst · Triage & Review
-                    </span>
-                  </div>
-                </div>
-                <ArrowRight size={16} className="text-slate-500 group-hover:text-purple-400 transition-colors" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickPersona("reviewer")}
-                disabled={isPending}
-                className="w-full flex items-center justify-between p-3.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700/80 hover:border-blue-500 transition-all text-left group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 font-bold flex items-center justify-center text-xs">
-                    AT
-                  </div>
-                  <div>
-                    <strong className="block text-sm font-semibold text-slate-100 group-hover:text-emerald-300">
-                      Alex Thorne
-                    </strong>
-                    <span className="text-xs text-slate-400">
-                      Finance Reviewer · Approvals & Reporting
-                    </span>
-                  </div>
-                </div>
-                <ArrowRight size={16} className="text-slate-500 group-hover:text-emerald-400 transition-colors" />
-              </button>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-300">
+                Password <span className="text-red-400">*</span>
+              </label>
             </div>
-
-            <div className="pt-2 text-center">
+            <div className="relative">
+              <Lock size={15} className="absolute left-3 top-3 text-slate-500" />
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="pl-9 pr-10 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
+              />
               <button
                 type="button"
-                onClick={() => setIsCustomMode(true)}
-                className="text-xs text-blue-400 hover:text-blue-300 font-medium underline underline-offset-4"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
               >
-                Or sign in with custom credentials
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
           </div>
-        ) : (
-          /* Custom Credentials Form */
-          <form onSubmit={handleCustomSubmit} className="space-y-4">
-            <div className="space-y-1">
+
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-300">Full Name</label>
               <div className="relative">
                 <User size={15} className="absolute left-3 top-3 text-slate-500" />
@@ -209,83 +160,71 @@ export default function Login() {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Jordan Lee"
-                  className="pl-9 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                  className="pl-9 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-xs"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Email Address</label>
-              <div className="relative">
-                <Mail size={15} className="absolute left-3 top-3 text-slate-500" />
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  required
-                  className="pl-9 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-300">Password / Passcode</label>
-              <div className="relative">
-                <Lock size={15} className="absolute left-3 top-3 text-slate-500" />
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="pl-9 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-300">Workspace Role</label>
               <select
                 value={role}
                 onChange={e => setRole(e.target.value as "admin" | "user")}
-                className="w-full h-10 px-3 bg-slate-800 border border-slate-700 rounded-md text-sm text-white"
+                className="w-full h-10 px-3 bg-slate-800/90 border border-slate-700 rounded-xl text-xs text-white focus:outline-hidden focus:border-blue-500"
               >
-                <option value="admin">Finance Admin (Full Permissions)</option>
-                <option value="user">Operations Analyst (Triage & Approvals)</option>
+                <option value="admin">Finance Admin</option>
+                <option value="user">Operations Analyst</option>
               </select>
             </div>
+          </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold mt-2"
-              disabled={isPending}
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold h-11 rounded-xl shadow-lg shadow-blue-600/20 text-sm cursor-pointer mt-2"
+            disabled={isPending}
+          >
+            {isPending ? (
+              <>
+                <RefreshCw size={15} className="spin mr-2" /> Authenticating…
+              </>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                Sign In to Workspace <ArrowRight size={15} />
+              </span>
+            )}
+          </Button>
+        </form>
+
+        {/* Demo Quick Fill Shortcuts */}
+        <div className="mt-6 pt-4 border-t border-slate-800">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
+            <KeyRound size={12} className="text-blue-400" />
+            <span>Quick Test Credentials</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => handleFillSample("eren@recoverly.io", "admin", "Eren Rocha")}
+              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700/80 transition-colors cursor-pointer flex items-center gap-1.5"
             >
-              {isPending ? (
-                <>
-                  <RefreshCw size={14} className="spin mr-2" /> Authenticating…
-                </>
-              ) : (
-                "Sign In to Workspace"
-              )}
-            </Button>
-
-            <div className="pt-1 text-center">
-              <button
-                type="button"
-                onClick={() => setIsCustomMode(false)}
-                className="text-xs text-slate-400 hover:text-slate-300"
-              >
-                ← Back to Persona Selection
-              </button>
-            </div>
-          </form>
-        )}
+              <span className="w-2 h-2 rounded-full bg-blue-400" />
+              <span>Admin (Eren)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleFillSample("maya@recoverly.io", "user", "Maya Patel")}
+              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700/80 transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <span className="w-2 h-2 rounded-full bg-purple-400" />
+              <span>Analyst (Maya)</span>
+            </button>
+          </div>
+        </div>
 
         {/* Security badge */}
-        <div className="mt-8 pt-4 border-t border-slate-800 flex items-center justify-center gap-2 text-[11px] text-slate-500">
-          <ShieldCheck size={14} className="text-blue-400" />
-          <span>Enterprise 256-bit Encrypted Session Guard</span>
+        <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-center gap-2 text-[11px] text-slate-500">
+          <ShieldCheck size={14} className="text-emerald-400" />
+          <span>Enterprise 256-bit Encrypted Session Guard (AAA)</span>
         </div>
       </div>
     </div>
