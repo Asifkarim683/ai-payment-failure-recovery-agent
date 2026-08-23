@@ -1,57 +1,56 @@
-# 💸 recoverly — Autonomous AI Payment Recovery Agent
+# 💸 Recoverly.ai — Autonomous AI Payment Recovery Agent
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.2-61dafb.svg)](https://react.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38bdf8.svg)](https://tailwindcss.com/)
-[![tRPC](https://img.shields.io/badge/tRPC-v11-25c2a0.svg)](https://trpc.io/)
-[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-0.44-c5f74f.svg)](https://orm.drizzle.team/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-**recoverly** is an autonomous, **human-in-the-loop Payment Recovery & Revenue Operations platform**. It monitors failed customer transactions in real time, classifies failure telemetry using confidence scoring, and executes bounded recovery actions (e.g. smart retries, fresh checkout links, card update portals) governed by policy guardrails.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel_Production-000000.svg?style=for-the-badge&logo=vercel)](https://payment-recovery-agent-three.vercel.app)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.2-61dafb.svg?style=for-the-badge&logo=react)](https://react.dev/)
+[![Google Gemini](https://img.shields.io/badge/AI-Google_Gemini_3.5-8e75ff.svg?style=for-the-badge&logo=googlegemini)](https://ai.google.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38bdf8.svg?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+[![tRPC](https://img.shields.io/badge/tRPC-v11-25c2a0.svg?style=for-the-badge&logo=trpc)](https://trpc.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🌟 Key Features
+## 🌐 Live Production Deployment
 
-### 1. 🧠 Explainable Diagnosis & Bounded Autonomy
-- **Autonomous Recovery**: Low-risk failures (e.g., transient bank network timeouts, soft balance dips) are automatically resolved within safe ceilings.
-- **Human-in-the-Loop Triage**: High-value transactions or low-confidence diagnoses are gated into an **Approval Queue** requiring explicit review before execution.
-- **Explainability First**: Every case includes a step-by-step audit trace with decision reasons, timestamps, and matched policy criteria.
+🔗 **Live Application URL**: **[https://payment-recovery-agent-three.vercel.app](https://payment-recovery-agent-three.vercel.app)**
 
-### 2. ⚡ Multi-Gateway Webhook Ingestion
-- Ingests failed payment webhooks from **Stripe** (`charge.failed`, `payment_intent.payment_failed`), **Razorpay** (`payment.failed`), and custom JSON sources.
-- Normalizes disparate decline codes into standardized root causes:
-  - `insufficient_funds`
-  - `otp_abandoned` / `3ds_dropped`
-  - `timeout`
-  - `expired_card`
-  - `do_not_honor`
-  - `cart_abandoned`
+### 🔑 Demo Workspace Accounts (Pre-Seeded Credentials)
 
-### 3. 🚀 Multi-Channel Recovery Dispatchers
-- **`fresh_checkout_link`**: Generates a secure, single-use checkout link and dispatches customer notifications.
-- **`delayed_retry`**: Schedules intelligent delayed retries around typical payroll and bank refresh cycles.
-- **`update_payment_method`**: Dispatches self-serve billing portal links to update expired or invalid cards.
-- **`immediate_retry`**: Dispatches instant retry requests to payment gateways for transient network drops.
-- **`cart_recovery_nudge`**: Dispatches omnichannel cart reminders.
+| User Name | Work Email | Password | RBAC Role | Permissions & Access |
+| :--- | :--- | :--- | :--- | :--- |
+| **Eren Rocha** | `eren@recoverly.io` | `password123` | **Finance Admin** (`admin`) | Full policy control, limits, approvals, simulation & AI copilot |
+| **Maya Patel** | `maya@recoverly.io` | `password123` | **Operations Analyst** (`user`) | Case triage, failure diagnostics, approval reviews & reports |
+| **Alex Thorne** | `alex@recoverly.io` | `password123` | **Operations Analyst** (`user`) | Approval queue review & recovery telemetry |
 
-### 4. 🎛️ Policy Studio & What-If Simulation Sandbox
-- Fine-tune retry limits, amount ceilings, minimum confidence floors, and cooldown periods.
-- **Policy Sandbox**: Test proposed threshold adjustments against historical failed transactions to project auto-resolution rates, gated counts, and revenue delta before publishing.
+> *Note: You can also use the **Sign Up** tab on the login page to register a new account and assign an RBAC role.*
 
-### 5. ⏱️ Replay Lab (Time-Travel Decision Inspector)
-- Step through past decisions at 1× speed to inspect exact telemetry and reasoning state available to the agent at every pipeline stage.
+---
 
-### 6. 📊 Reports & Data Exporters
-- Comprehensive analytics for net recovered revenue, recovery rates, action performance, and governance SLAs.
-- One-click **CSV** and **JSON** data export for accounting and audits.
+## 🌟 What is Recoverly.ai?
 
-### 7. 🔐 Authentication & Quick Persona Switcher
-- Full session authentication with signed 256-bit JWT cookies.
-- 1-click **Team Persona Switcher** for testing different access levels:
-  - 👑 **Eren Rocha** &mdash; *Finance Admin* (Full Policy Governance & Approvals)
-  - 🔍 **Maya Patel** &mdash; *Recovery Ops Analyst* (Triage & Approvals)
-  - 📋 **Alex Thorne** &mdash; *Finance Reviewer* (Approvals & Analytics)
+**Recoverly.ai** is an autonomous, **human-in-the-loop Revenue Operations & Payment Recovery platform**. It intercepts failed customer transactions in real time, classifies failure telemetry using **Google Gemini 3.5 multi-signal intelligence**, and executes bounded recovery actions (smart retries, dynamic checkout links, AI recovery nudges) governed by strict enterprise policy guardrails.
+
+---
+
+## 🚀 Key Features
+
+### 1. 🧠 Multi-Signal AI Diagnosis (Google Gemini 3.5)
+- **Deep Failure Intelligence**: Analyzes gateway decline codes (`do_not_honor`, `insufficient_funds`, `504_gateway_timeout`, `expired_card`), attempt counts, and merchant behavior to predict root cause with **96%+ confidence**.
+- **Deterministic Heuristic Fallback**: 100% resilient fallback engine ensuring uninterrupted 24/7 recovery execution even during external API downtime.
+
+### 2. 🛡️ Enterprise Policy Guardrails & Human-in-the-Loop Gating
+- **Confidence Floors & Amount Ceilings**: Auto-executes safe, low-risk recoveries while routing high-value or low-confidence transactions to an **Approval Queue**.
+- **What-If Policy Simulator**: Test policy threshold adjustments against historical failed transactions before publishing.
+
+### 3. 📱 Generative AI Outreach (Email / WhatsApp / SMS)
+- Generates personalized, branded recovery nudges with dynamic, single-use checkout links to recover abandoned 3DS OTPs and expired payment methods.
+
+### 4. 💬 Interactive Gemini Finance Copilot
+- Natural language chat drawer answering ad-hoc queries about revenue at risk, top decline causes, and policy advice directly against live database telemetry.
+
+### 5. ⏱️ Replay Lab & Immutable Compliance Audit Trail (AAA)
+- Step-by-step decision trace drawer with visual pipeline steppers (`Ingest` → `Diagnose` → `Policy` → `Gate` → `Execute` → `Audit`).
+- Full **Authentication, Authorization & Accounting (AAA)** session verification and role-based access control.
 
 ---
 
@@ -60,13 +59,13 @@
 ```mermaid
 flowchart LR
     A["Failed Payment Webhook\n(Stripe / Razorpay)"] --> B["Ingest & Normalize"]
-    B --> C["Diagnose Root Cause\n+ Confidence Score"]
+    B --> C["Gemini AI Diagnosis\n(Root Cause + Confidence)"]
     C --> D{"Evaluate Policy\nGuardrails"}
     D -- "Safe & Within Ceiling" --> E["Automated Recovery\nAction Dispatcher"]
     D -- "Above Ceiling / Low Confidence" --> F["Approval Queue\n(Human Review)"]
     F -- "Approved" --> E
     F -- "Rejected" --> G["Audit Log Only\n(No Outbound Action)"]
-    E --> H["Outcome & Recovered\nRevenue Logged"]
+    E --> H["Outcome & Recovered\nRevenue Logged (AAA)"]
 ```
 
 ---
@@ -77,17 +76,15 @@ flowchart LR
 | :--- | :--- |
 | **Frontend** | React 19, TypeScript, Tailwind CSS v4, Radix UI Primitives, Lucide Icons, Recharts, Framer Motion, Sonner Toasts |
 | **Routing & State** | Wouter, TanStack React Query v5 |
-| **API & Backend** | Express 4, tRPC v11, SuperJSON, Zod |
-| **Database & ORM** | MySQL 2, Drizzle ORM, Drizzle Kit (with synchronized in-memory fallback store) |
-| **Testing & Tooling** | Vitest, TypeScript (Strict), Vite 7, esbuild, tsx |
+| **API & Backend** | Node.js, Express, tRPC v11, SuperJSON, Zod |
+| **AI Intelligence** | Google Gemini 3.5 / 3.7 Multi-Model Engine (with offline fallback matrix) |
+| **Database & ORM** | MySQL 2, Drizzle ORM (with synchronized in-memory repository cache) |
+| **Cloud Deployment** | Vercel Serverless Platform (`@vercel/node` + `esbuild`) |
+| **Testing & Quality** | Vitest (27 unit & integration tests), TypeScript Strict Mode (`tsc --noEmit`) |
 
 ---
 
-## 🚀 Quick Start
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v20+ recommended)
-- [pnpm](https://pnpm.io/) or [npm](https://www.npmjs.com/)
+## 🚀 Quick Start (Local Development)
 
 ### 1. Clone the Repository
 ```bash
@@ -102,17 +99,15 @@ pnpm install
 npm install
 ```
 
-### 3. Configure Environment (Optional)
+### 3. Environment Variables (Optional)
 ```bash
 cp .env.example .env
 ```
-*(The platform runs out-of-the-box with its built-in in-memory repository store even without a live database connection).*
+*(The application runs out-of-the-box with its built-in in-memory state repository even without a live MySQL connection).*
 
 ### 4. Start Development Server
 ```bash
 pnpm dev
-# or
-npm run dev
 ```
 Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
@@ -137,68 +132,19 @@ pnpm build
 
 ---
 
-## 📡 API & Webhooks Reference
+## 📡 Gateway Webhook Ingestion Reference
 
 ### Webhook Endpoint
 - **URL**: `POST /api/webhooks/payment`
 - **Headers**: `Content-Type: application/json`, `x-provider: stripe | razorpay | custom`
 
-#### Example Payload (Synthetic / Custom):
+#### Example Webhook Payload:
 ```json
 {
-  "merchantName": "Vanguard Media",
-  "amount": 14500,
-  "declineCode": "otp_abandoned"
+  "merchantName": "Northstar Learning",
+  "amount": 18400,
+  "declineCode": "insufficient_funds"
 }
-```
-
-### tRPC Procedures
-- `recovery.overview`: Returns live runs, cases, approvals, policies, and pipeline status.
-- `recovery.listCases`: Filter cases by status, search term, or decline cause.
-- `recovery.decideApproval`: Approve or reject gated actions with reviewer attribution.
-- `recovery.simulatePolicy`: Runs what-if sandbox simulation against historical cases.
-- `recovery.exportReport`: Generates structured CSV/JSON report exports.
-- `auth.login` / `auth.quickLogin`: Authenticate with credentials or 1-click persona.
-
----
-
-## 📂 Project Structure
-
-```
-payment-recovery-agent/
-├── client/
-│   ├── src/
-│   │   ├── _core/hooks/        # Auth & session management hooks
-│   │   ├── components/
-│   │   │   ├── recovery/       # Modular recovery dashboard views
-│   │   │   │   ├── OverviewTab.tsx
-│   │   │   │   ├── CasesTab.tsx
-│   │   │   │   ├── ApprovalsTab.tsx
-│   │   │   │   ├── PolicyStudioTab.tsx
-│   │   │   │   ├── PolicySimulatorModal.tsx
-│   │   │   │   ├── ReplayLabTab.tsx
-│   │   │   │   ├── ReportsTab.tsx
-│   │   │   │   ├── DecisionTraceDrawer.tsx
-│   │   │   │   ├── SimulatePaymentModal.tsx
-│   │   │   │   └── ExportReportModal.tsx
-│   │   │   └── ui/             # Radix UI primitives & styled components
-│   │   ├── pages/
-│   │   │   ├── Home.tsx        # Main dashboard orchestrator
-│   │   │   └── Login.tsx       # Dedicated sign-in & persona portal
-│   │   ├── App.tsx             # Application router & theme provider
-│   │   └── index.css           # Design tokens, custom animations & styles
-├── server/
-│   ├── _core/                  # Express middleware, OAuth, cookies, Vite runner
-│   ├── db.ts                   # Drizzle ORM repository with in-memory sync store
-│   ├── execution.ts            # Recovery action execution & dispatchers
-│   ├── recovery.logic.ts       # Domain logic, normalizers & policy simulation
-│   ├── routers.ts              # tRPC app router
-│   └── webhooks.ts             # Gateway webhook ingestion router
-├── shared/
-│   ├── const.ts                # Constants & cookie names
-│   └── types.ts                # Shared TypeScript domain models
-└── drizzle/
-    └── schema.ts               # MySQL schema definitions
 ```
 
 ---
