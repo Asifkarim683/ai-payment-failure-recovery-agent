@@ -28,29 +28,33 @@ function createTestContext(): { ctx: TrpcContext; setCookies: Record<string, str
   return { ctx, setCookies };
 }
 
-describe("auth.login and auth.quickLogin", () => {
-  it("authenticates a custom email user and sets session cookie", async () => {
+describe("auth.login and auth.signup", () => {
+  it("signs up a new user with RBAC role and sets session cookie", async () => {
+    const { ctx, setCookies } = createTestContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.auth.signup({
+      email: "jordan.lee@example.com",
+      password: "secure_password_123",
+      name: "Jordan Lee",
+      role: "admin",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.user?.email).toBe("jordan.lee@example.com");
+    expect(result.user?.name).toBe("Jordan Lee");
+    expect(result.user?.role).toBe("admin");
+    expect(setCookies[COOKIE_NAME]).toBeDefined();
+  });
+
+  it("authenticates an existing user via login", async () => {
     const { ctx, setCookies } = createTestContext();
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.auth.login({
-      email: "finance.analyst@example.com",
-      password: "secure_password_123",
-      name: "Finance User",
-      role: "user",
+      email: "eren@recoverly.io",
+      password: "password123",
     });
-
-    expect(result.success).toBe(true);
-    expect(result.user?.email).toBe("finance.analyst@example.com");
-    expect(result.user?.name).toBe("Finance User");
-    expect(setCookies[COOKIE_NAME]).toBeDefined();
-  });
-
-  it("authenticates via quickLogin for admin persona", async () => {
-    const { ctx, setCookies } = createTestContext();
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.auth.quickLogin({ persona: "admin" });
 
     expect(result.success).toBe(true);
     expect(result.user?.name).toBe("Eren Rocha");

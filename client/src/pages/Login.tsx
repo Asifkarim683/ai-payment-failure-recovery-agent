@@ -10,7 +10,10 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
-  KeyRound,
+  UserPlus,
+  LogIn,
+  Shield,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +24,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 export default function Login() {
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+
+  // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -44,36 +50,45 @@ export default function Login() {
     },
     onError: (err: any) => {
       toast.error("Authentication failed", {
-        description: err.message || "Please check your credentials.",
+        description: err.message || "Please check your email and password.",
       });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const signupMutation = trpc.auth.signup.useMutation({
+    onSuccess: (data) => {
+      utils.auth.me.setData(undefined, data.user as any);
+      toast.success("Account created successfully!", {
+        description: `Welcome ${data.user?.name}. Your ${data.user?.role === "admin" ? "Finance Admin" : "Operations Analyst"} workspace is ready.`,
+      });
+      setLocation("/");
+    },
+    onError: (err: any) => {
+      toast.error("Registration failed", {
+        description: err.message || "Unable to create account. Please try again.",
+      });
+    },
+  });
+
+  const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Please provide both email and password.");
+      toast.error("Please enter both email and password.");
       return;
     }
-    loginMutation.mutate({
-      email,
-      password,
-      name: name || undefined,
-      role,
-    });
+    loginMutation.mutate({ email, password });
   };
 
-  const handleFillSample = (sampleEmail: string, sampleRole: "admin" | "user", sampleName: string) => {
-    setEmail(sampleEmail);
-    setPassword("password123");
-    setName(sampleName);
-    setRole(sampleRole);
-    toast.info("Sample credentials filled", {
-      description: "Click 'Sign In to Workspace' to proceed.",
-    });
+  const handleSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password || !name) {
+      toast.error("Please fill in your name, email, and password.");
+      return;
+    }
+    signupMutation.mutate({ email, password, name, role });
   };
 
-  const isPending = loginMutation.isPending;
+  const isPending = loginMutation.isPending || signupMutation.isPending;
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
@@ -92,139 +107,260 @@ export default function Login() {
               recover<span className="text-blue-400">ly</span>
             </div>
             <div className="text-[10px] tracking-widest uppercase text-slate-400 font-semibold">
-              Autonomous Recovery
+              Autonomous Revenue Operations
             </div>
           </div>
         </div>
 
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">
-            Sign In to Workspace
+        {/* Tab Switcher */}
+        <div className="grid grid-cols-2 p-1 bg-slate-800/80 rounded-xl border border-slate-700/80 mb-6">
+          <button
+            type="button"
+            onClick={() => setMode("signin")}
+            className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              mode === "signin"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <LogIn size={14} />
+            <span>Sign In</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("signup")}
+            className={`flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              mode === "signup"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <UserPlus size={14} />
+            <span>Create Account</span>
+          </button>
+        </div>
+
+        {/* Title */}
+        <div className="mb-5">
+          <h1 className="text-xl font-bold tracking-tight text-slate-100">
+            {mode === "signin" ? "Sign In to Workspace" : "Register Workspace User"}
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Enter your credentials to access autonomous payment recovery and governance.
+          <p className="text-xs text-slate-400 mt-1">
+            {mode === "signin"
+              ? "Access autonomous payment recovery workflows and policy governance."
+              : "Set up your credentials and assign Role-Based Access Control (RBAC)."}
           </p>
         </div>
 
-        {/* Credentials Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">
-              Work Email <span className="text-red-400">*</span>
-            </label>
-            <div className="relative">
-              <Mail size={15} className="absolute left-3 top-3 text-slate-500" />
-              <Input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="name@company.com"
-                required
-                className="pl-9 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-300">
-                Password <span className="text-red-400">*</span>
-              </label>
-            </div>
-            <div className="relative">
-              <Lock size={15} className="absolute left-3 top-3 text-slate-500" />
-              <Input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="pl-9 pr-10 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
-              >
-                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-1">
+        {/* SIGN IN FORM */}
+        {mode === "signin" ? (
+          <form onSubmit={handleSignIn} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Full Name</label>
+              <label className="text-xs font-semibold text-slate-300">
+                Work Email <span className="text-red-400">*</span>
+              </label>
               <div className="relative">
-                <User size={15} className="absolute left-3 top-3 text-slate-500" />
+                <Mail size={15} className="absolute left-3 top-3 text-slate-500" />
                 <Input
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="e.g. Jordan Lee"
-                  className="pl-9 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-xs"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  required
+                  className="pl-9 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300">Workspace Role</label>
-              <select
-                value={role}
-                onChange={e => setRole(e.target.value as "admin" | "user")}
-                className="w-full h-10 px-3 bg-slate-800/90 border border-slate-700 rounded-xl text-xs text-white focus:outline-hidden focus:border-blue-500"
-              >
-                <option value="admin">Finance Admin</option>
-                <option value="user">Operations Analyst</option>
-              </select>
+              <label className="text-xs font-semibold text-slate-300">
+                Password <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Lock size={15} className="absolute left-3 top-3 text-slate-500" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="pl-9 pr-10 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold h-11 rounded-xl shadow-lg shadow-blue-600/20 text-sm cursor-pointer mt-2"
-            disabled={isPending}
-          >
-            {isPending ? (
-              <>
-                <RefreshCw size={15} className="spin mr-2" /> Authenticating…
-              </>
-            ) : (
-              <span className="flex items-center justify-center gap-2">
-                Sign In to Workspace <ArrowRight size={15} />
-              </span>
-            )}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold h-11 rounded-xl shadow-lg shadow-blue-600/20 text-sm cursor-pointer mt-2"
+              disabled={isPending}
+            >
+              {isPending ? (
+                <>
+                  <RefreshCw size={15} className="spin mr-2" /> Authenticating…
+                </>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  Sign In <ArrowRight size={15} />
+                </span>
+              )}
+            </Button>
 
-        {/* Demo Quick Fill Shortcuts */}
-        <div className="mt-6 pt-4 border-t border-slate-800">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-            <KeyRound size={12} className="text-blue-400" />
-            <span>Quick Test Credentials</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => handleFillSample("eren@recoverly.io", "admin", "Eren Rocha")}
-              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700/80 transition-colors cursor-pointer flex items-center gap-1.5"
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                Don't have an account? <span className="text-blue-400 underline font-medium">Create one</span>
+              </button>
+            </div>
+          </form>
+        ) : (
+          /* SIGN UP FORM (WITH RBAC) */
+          <form onSubmit={handleSignUp} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-300">
+                Full Name <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <User size={15} className="absolute left-3 top-3 text-slate-500" />
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="e.g. Jordan Lee"
+                  required
+                  className="pl-9 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-300">
+                Work Email <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-3 top-3 text-slate-500" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  required
+                  className="pl-9 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-300">
+                Password <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <Lock size={15} className="absolute left-3 top-3 text-slate-500" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={3}
+                  className="pl-9 pr-10 bg-slate-800/90 border-slate-700 text-white placeholder:text-slate-500 h-10 rounded-xl text-sm focus:border-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-200"
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            {/* RBAC Role Selector */}
+            <div className="space-y-1.5 pt-1">
+              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                <Shield size={13} className="text-blue-400" />
+                <span>Assign RBAC Role</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRole("admin")}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    role === "admin"
+                      ? "border-blue-500 bg-blue-950/40 text-white ring-1 ring-blue-500/50"
+                      : "border-slate-800 bg-slate-800/60 text-slate-400 hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-blue-400 mb-1">
+                    <ShieldCheck size={14} />
+                    <span>Finance Admin</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-tight">
+                    Full policy rules, limits, approvals & copilot.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRole("user")}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    role === "user"
+                      ? "border-purple-500 bg-purple-950/40 text-white ring-1 ring-purple-500/50"
+                      : "border-slate-800 bg-slate-800/60 text-slate-400 hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-purple-400 mb-1">
+                    <Briefcase size={14} />
+                    <span>Ops Analyst</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-tight">
+                    Case triage, queue approvals & recovery reports.
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold h-11 rounded-xl shadow-lg shadow-blue-600/20 text-sm cursor-pointer mt-2"
+              disabled={isPending}
             >
-              <span className="w-2 h-2 rounded-full bg-blue-400" />
-              <span>Admin (Eren)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleFillSample("maya@recoverly.io", "user", "Maya Patel")}
-              className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700/80 transition-colors cursor-pointer flex items-center gap-1.5"
-            >
-              <span className="w-2 h-2 rounded-full bg-purple-400" />
-              <span>Analyst (Maya)</span>
-            </button>
-          </div>
-        </div>
+              {isPending ? (
+                <>
+                  <RefreshCw size={15} className="spin mr-2" /> Creating Account…
+                </>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  Create Account & Sign In <ArrowRight size={15} />
+                </span>
+              )}
+            </Button>
+
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => setMode("signin")}
+                className="text-xs text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                Already have an account? <span className="text-blue-400 underline font-medium">Sign in</span>
+              </button>
+            </div>
+          </form>
+        )}
 
         {/* Security badge */}
         <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-center gap-2 text-[11px] text-slate-500">
           <ShieldCheck size={14} className="text-emerald-400" />
-          <span>Enterprise 256-bit Encrypted Session Guard (AAA)</span>
+          <span>Enterprise 256-bit Encrypted Session Guard (AAA & RBAC)</span>
         </div>
       </div>
     </div>

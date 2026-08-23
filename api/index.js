@@ -1834,19 +1834,21 @@ var appRouter = router({
     login: publicProcedure.input(
       z2.object({
         email: z2.string().email(),
-        password: z2.string().min(3),
-        name: z2.string().optional(),
-        role: z2.enum(["admin", "user"]).default("user")
+        password: z2.string().min(3)
       })
     ).mutation(async ({ input, ctx }) => {
       let existing = await getUserByEmail(input.email);
-      const openId = existing ? existing.openId : `user_${Date.now().toString(36)}`;
-      const name = input.name || existing?.name || input.email.split("@")[0] || "User";
+      if (!existing) {
+        throw new Error("No account found with this email. Please sign up first.");
+      }
+      const openId = existing.openId;
+      const name = existing.name || input.email.split("@")[0] || "User";
+      const role = existing.role || "user";
       await upsertUser({
         openId,
         email: input.email,
         name,
-        role: input.role,
+        role,
         loginMethod: "password",
         lastSignedIn: /* @__PURE__ */ new Date()
       });
@@ -1864,45 +1866,33 @@ var appRouter = router({
         id: `aud_auth_${Date.now()}`,
         eventId: "sys_auth",
         stepName: "audit",
-        detail: `User ${user?.name || openId} authenticated successfully via credentials. Role: ${input.role.toUpperCase()}`,
+        detail: `User ${user?.name || openId} signed in via credentials. Role: ${user?.role?.toUpperCase()}`,
         state: "done",
         timestamp: Date.now()
       });
       return { success: true, user, token: sessionToken };
     }),
-    quickLogin: publicProcedure.input(z2.object({ persona: z2.enum(["admin", "analyst", "reviewer"]) })).mutation(async ({ input, ctx }) => {
-      const personaMap = {
-        admin: {
-          openId: "user_eren_admin",
-          name: "Eren Rocha",
-          email: "eren@recoverly.io",
-          role: "admin"
-        },
-        analyst: {
-          openId: "user_maya_analyst",
-          name: "Maya Patel",
-          email: "maya@recoverly.io",
-          role: "user"
-        },
-        reviewer: {
-          openId: "user_alex_reviewer",
-          name: "Alex Thorne",
-          email: "alex@recoverly.io",
-          role: "user"
-        }
-      };
-      const target = personaMap[input.persona];
+    signup: publicProcedure.input(
+      z2.object({
+        email: z2.string().email(),
+        password: z2.string().min(3),
+        name: z2.string().min(1),
+        role: z2.enum(["admin", "user"]).default("user")
+      })
+    ).mutation(async ({ input, ctx }) => {
+      let existing = await getUserByEmail(input.email);
+      const openId = existing ? existing.openId : `user_${Date.now().toString(36)}`;
       await upsertUser({
-        openId: target.openId,
-        name: target.name,
-        email: target.email,
-        role: target.role,
+        openId,
+        email: input.email,
+        name: input.name,
+        role: input.role,
         loginMethod: "password",
         lastSignedIn: /* @__PURE__ */ new Date()
       });
-      const user = await getUserByOpenId(target.openId);
-      const sessionToken = await sdk.createSessionToken(target.openId, {
-        name: target.name,
+      const user = await getUserByOpenId(openId);
+      const sessionToken = await sdk.createSessionToken(openId, {
+        name: input.name,
         expiresInMs: ONE_YEAR_MS
       });
       const cookieOptions = getSessionCookieOptions(ctx.req);
@@ -1914,7 +1904,7 @@ var appRouter = router({
         id: `aud_auth_${Date.now()}`,
         eventId: "sys_auth",
         stepName: "audit",
-        detail: `Quick login active for persona: ${target.name} (${target.role.toUpperCase()})`,
+        detail: `New user ${input.name} registered with role: ${input.role.toUpperCase()}`,
         state: "done",
         timestamp: Date.now()
       });
